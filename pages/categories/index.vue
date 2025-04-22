@@ -22,7 +22,7 @@ const { data: categories, status } = await useFetch("/api/category");
         <template #footer>
           <UButton
             trailing-icon="i-lucide-arrow-right"
-            :to="`services/${category.id}`"
+            :to="`/categories/services/${category.id}`"
             color="secondary"
             size="xl"
           >

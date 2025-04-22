@@ -13,18 +13,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Category{
-  id Int @id @default(autoincrement())
-name String @unique
-image String 
-services Services[]   
+model Category {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  image       String
+  description Json?
+  services    Services[]
 }
+
 model Services {
- id Int @id @default(autoincrement())
-name String
-image String 
-price Int
-categoryName String
-category Category @relation(fields: [categoryName], references: [name]) 
-description Json?
+  id           Int      @id @default(autoincrement())
+  name         String
+  image        String
+  price        Int
+  categoryName String
+  category     Category @relation(fields: [categoryName], references: [name])
+  description  Json?
 }

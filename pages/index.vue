@@ -53,7 +53,7 @@ const items = ref<AccordionItem[]>([
           Здоровье вашей улыбки — наша забота и профессионализм
         </p>
         <UButton
-          to="/services"
+          to="/categories"
           class="py-6 px-6 text-2xl"
           size="xl"
           color="secondary"
@@ -132,7 +132,7 @@ const items = ref<AccordionItem[]>([
         class="relative left-5/6"
         trailing-icon="i-lucide-arrow-right"
         color="secondary"
-        to="/services"
+        to="/categories"
         size="xl"
         >Перейти к услугам</UButton
       >

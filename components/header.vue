@@ -8,7 +8,7 @@
     <nav class="flex items-center">
       <div class="flex items-center space-x-4">
         <NuxtLink to="/">О клинике</NuxtLink>
-        <NuxtLink to="/services">Услуги</NuxtLink>
+        <NuxtLink to="/categories">Услуги</NuxtLink>
         <NuxtLink to="/doctors">Врачи</NuxtLink>
         <NuxtLink to="/contacts">Контакты</NuxtLink>
         <span class="font-bold text-black"> +7 (800) 985-80-45 </span>
