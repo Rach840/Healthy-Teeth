@@ -15,6 +15,7 @@ const snilsValidate = computed(() => {
 });
 
 const modelValue = shallowRef(new CalendarDate(2022, 1, 10));
+
 console.log(modelValue.value);
 const show = ref(false);
 const schema = z.object({
