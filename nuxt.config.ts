@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from "@tailwindcss/vite";
+
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
   devtools: { enabled: true },
@@ -12,4 +13,7 @@ export default defineNuxtConfig({
     colorMode: false,
   },
   modules: ["@nuxt/icon", "@nuxt/ui"],
+  typescript: {
+    typeCheck: false,
+  },
 });

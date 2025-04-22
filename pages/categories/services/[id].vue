@@ -6,7 +6,7 @@ const { data: services } = await useFetch(`/api/services/${route.params.id}`);
 console.log(services.value);
 </script>
 <template>
-  <div class="container mx-auto py-12 space-y-8">
+  <UContainer class="py-12 space-y-8">
     <UCard class="flex items-center bg-blue-100 p-8 justify-between">
       <template #default>
         <div class="flex gap-8 items-center justify-between">
@@ -53,5 +53,5 @@ console.log(services.value);
         </template>
       </CardCategory>
     </div>
-  </div>
+  </UContainer>
 </template>
