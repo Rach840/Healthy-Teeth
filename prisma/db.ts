@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { process } from "std-env";
 
 const prismaClientSingleton = () => {
   return new PrismaClient();

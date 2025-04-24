@@ -1,54 +1,98 @@
 <script setup lang="ts">
 import * as z from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
-import { CalendarDate, DateFormatter } from "@internationalized/date";
+import { PinInput, PinInputGroup } from "@/components/ui/pin-input";
+import { PinInputInput } from "reka-ui";
+import { PinInputSeparator } from "~/components/ui/pin-input";
+import {
+  CalendarDate,
+  DateFormatter,
+  getLocalTimeZone,
+  parseDate,
+  today,
+} from "@internationalized/date";
+import { Calendar } from "~/components/ui/calendar";
+import { toDate } from "reka-ui/date";
 
-const df = new DateFormatter("ru-RU", {
-  dateStyle: "full",
-});
 const phoneRegex = new RegExp(
   /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/,
 );
-const snils = ref([]);
-const snilsValidate = computed(() => {
-  return snils.value.join("");
+const genders = [
+  {
+    label: "Женский",
+    value: "FEMALE",
+  },
+  {
+    label: "Мужской",
+    value: "MALE",
+  },
+];
+const value = computed({
+  get: () => (state.birth ? parseDate(state.birth) : undefined),
+  set: (val) => val,
 });
-
-const modelValue = shallowRef(new CalendarDate(2022, 1, 10));
-
-console.log(modelValue.value);
+const snils = ref<string[]>([]);
+const snilsComp = () => {
+  state.snils = snils.value.join("");
+};
+const errorMessage = ref<string>("");
+const df = new DateFormatter("ru-RU", {
+  dateStyle: "long",
+});
 const show = ref(false);
 const schema = z.object({
   firstName: z.string().min(3, "Минимум 3  символа"),
   lastName: z.string().min(4, "Минимум 4  символа"),
   surName: z.string().min(6, "Минимум 6  символов"),
-  snils: z.string().min(11, "Заполните все поля"),
+  snils: z.string().min(10, "Заполните все поля"),
+  birth: z
+    .string()
+    .refine((v) => v, { message: "A date of birth is required." }),
   phone: z
     .string()
     .regex(phoneRegex, { message: "Введите корректный номер телефона" }),
   email: z.string().email("Введите корректный email"),
+  gender: z.string(),
   password: z.string().min(8, "Минимум 8  символов"),
 });
 
 type Schema = z.output<typeof schema>;
-
+const placeholder = ref();
 const state = reactive<Partial<Schema>>({
   firstName: undefined,
   lastName: undefined,
   surName: undefined,
-  snils: snilsValidate.value,
+  snils: undefined,
   phone: undefined,
-  modelValue: undefined,
+  birth: undefined,
+  gender: undefined,
   email: undefined,
   password: undefined,
 });
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  console.log(event.data);
+  const resp: { succes: boolean; message: string } = await $fetch(
+    "/api/users/create",
+    {
+      method: "post",
+      body: { user: event.data },
+    },
+  );
+  if (resp.message) {
+    errorMessage.value = true;
+  }
 }
 </script>
 <template>
   <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
+    <UAlert
+      v-if="errorMessage"
+      color="error"
+      :title="errorMessage"
+      class="w-full"
+      description="Поменяйте электронную почту или войдите"
+      icon="i-lucide-terminal"
+    />
     <div class="grid grid-cols-2 gap-6">
       <UFormField
         class="col-span-1"
@@ -91,7 +135,25 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         label="Снилс"
         name="lastName"
       >
-        <UPinInput v-model="snils" type="number" length="11" class="w-full" />
+        <PinInput id="pin-input" v-model="snils" @complete="snilsComp">
+          <PinInputGroup class="gap-1">
+            <template v-for="(id, index) in 11" :key="id">
+              <PinInputInput
+                class="rounded-md p-1 w-[30px] text-center border"
+                :index="index"
+              />
+              <template v-if="index === 2">
+                <PinInputSeparator />
+              </template>
+              <template v-if="index === 5">
+                <PinInputSeparator />
+              </template>
+              <template v-if="index === 8">
+                <PinInputSeparator />
+              </template>
+            </template>
+          </PinInputGroup>
+        </PinInput>
       </UFormField>
       <UFormField
         class="col-span-1"
@@ -130,20 +192,31 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       >
         <UPopover>
           <UButton
-            class="w-full"
             color="neutral"
+            class="w-full p-2.5"
             variant="subtle"
             icon="i-lucide-calendar"
           >
-            {{
-              state.modelValue
-                ? df.format(state.modelValue.toDate(getLocalTimeZone()))
-                : "Выберите дату"
-            }}
+            {{ value ? df.format(toDate(value)) : "Выберите дату" }}
           </UButton>
-
           <template #content>
-            <UCalendar v-model="state.modelValue" class="p-2" />
+            <Calendar
+              v-model:placeholder="placeholder"
+              v-model="value"
+              calendar-label="Дата рождения"
+              initial-focus
+              :min-value="new CalendarDate(1900, 1, 1)"
+              :max-value="today(getLocalTimeZone())"
+              @update:model-value="
+                (v) => {
+                  if (v) {
+                    state.birth = v.toString();
+                  } else {
+                    state.birth = undefined;
+                  }
+                }
+              "
+            />
           </template>
         </UPopover>
       </UFormField>
@@ -172,6 +245,15 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
               @click="show = !show"
             /> </template
         ></UInput>
+      </UFormField>
+      <UFormField
+        class="col-span-1"
+        required
+        size="xl"
+        label="Пол"
+        name="gender"
+      >
+        <USelect v-model="state.gender" :items="genders" class="w-48" />
       </UFormField>
     </div>
     <UButton size="xl" type="submit"> Зарегистрироваться </UButton>
