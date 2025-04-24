@@ -12,12 +12,7 @@ export default defineNuxtConfig({
   ui: {
     colorMode: false,
   },
-  modules: [
-    "@nuxt/icon",
-    "@nuxt/ui",
-    "@prisma/nuxt",
-    "nuxt-auth-utils",
-  ],
+  modules: ["@nuxt/icon", "@nuxt/ui", "nuxt-auth-utils"],
   typescript: {
     typeCheck: false,
   },
