@@ -14,6 +14,7 @@ import {
 import { Calendar } from "~/components/ui/calendar";
 import { toDate } from "reka-ui/date";
 
+const router = useRouter();
 const phoneRegex = new RegExp(
   /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/,
 );
@@ -28,9 +29,10 @@ const genders = [
   },
 ];
 const value = computed({
-  get: () => (state.birth ? parseDate(state.birth) : undefined),
+  get: () => (dataMessage.value ? parseDate(dataMessage.value) : undefined),
   set: (val) => val,
 });
+const dataMessage = ref("");
 const snils = ref<string[]>([]);
 const snilsComp = () => {
   state.snils = snils.value.join("");
@@ -43,11 +45,13 @@ const show = ref(false);
 const schema = z.object({
   firstName: z.string().min(3, "Минимум 3  символа"),
   lastName: z.string().min(4, "Минимум 4  символа"),
-  surName: z.string().min(6, "Минимум 6  символов"),
-  snils: z.string().min(10, "Заполните все поля"),
-  birth: z
+  surName: z
     .string()
-    .refine((v) => v, { message: "A date of birth is required." }),
+    .min(6, "Минимум 6  символов")
+    .optional()
+    .or(z.literal("")),
+  snils: z.string().min(10, "Заполните все поля"),
+  birth: z.date(),
   phone: z
     .string()
     .regex(phoneRegex, { message: "Введите корректный номер телефона" }),
@@ -71,15 +75,18 @@ const state = reactive<Partial<Schema>>({
 });
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  const resp: { succes: boolean; message: string } = await $fetch(
+  const resp: { succes: boolean; message?: string } = await $fetch(
     "/api/users/create",
     {
       method: "post",
       body: { user: event.data },
     },
   );
+  if (resp.succes) {
+    await router.push("/");
+  }
   if (resp.message) {
-    errorMessage.value = true;
+    errorMessage.value = resp.message;
   }
 }
 </script>
@@ -230,7 +237,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
               @update:model-value="
                 (v) => {
                   if (v) {
-                    state.birth = v.toString();
+                    dataMessage = v.toString();
+                    state.birth = toDate(v);
                   } else {
                     state.birth = undefined;
                   }

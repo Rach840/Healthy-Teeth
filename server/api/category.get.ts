@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
         services: services.filter((item) => item.categoryName == category.name), // Если у услуги название родительской категории такое же что и у текущей категории то добавить массив принадлежаших категории услуг
       };
     });
-    // Возвращяем категории вместе с услугами принадлежих ему
+    // Возвращаем категории вместе с услугами принадлежих ему
     return categoriesWithServices;
   } catch (error) {
     console.error(error);

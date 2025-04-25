@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   });
   const servicesByCategory = await prisma.services.findMany({
     where: {
-      categoryName: getCategory.name,
+      categoryName: getCategory?.name,
     },
   });
 
