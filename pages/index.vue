@@ -73,7 +73,11 @@ const items = ref<AccordionItem[]>([
       <div class="flex flex-col md:flex-row items-start gap-10">
         <div class="w-full md:w-3/12 flex flex-col items-center">
           <div class="director w-full">
-            <img class="w-full" src="/director.png" alt="director" />
+            <img
+              class="w-full"
+              src="/director.png"
+              alt="director"
+            />
           </div>
 
           <h3 class="font-bold text-2xl text-center mt-4">
@@ -118,11 +122,17 @@ const items = ref<AccordionItem[]>([
           v-for="category in categories.slice(0, 3)"
         >
           <template #image>
-            <img :src="category.image" alt="" />
+            <img
+              :src="category.image"
+              alt=""
+            />
           </template>
           <template #categoryTitle>{{ category.name }}</template>
           <template #servicesList>
-            <li class="text-xl" v-for="service in category.services">
+            <li
+              class="text-xl"
+              v-for="service in category.services"
+            >
               {{ service.name }}
             </li>
           </template>
@@ -157,7 +167,11 @@ const items = ref<AccordionItem[]>([
         <UCard v-for="advantages in mockAdvantages">
           <template #header>
             <div class="space-y-4">
-              <img :src="advantages.image" alt="" class="mx-auto size-1/2" />
+              <img
+                :src="advantages.image"
+                alt=""
+                class="mx-auto size-1/2"
+              />
               <h3 class="text-xl text-center">{{ advantages.title }}</h3>
             </div>
           </template>

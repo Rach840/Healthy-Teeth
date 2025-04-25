@@ -24,3 +24,6 @@ logs
 !.env.example
 
 .qodo
+
+# Prisma
+prisma/generated

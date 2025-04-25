@@ -84,7 +84,12 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 }
 </script>
 <template>
-  <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
+  <UForm
+    :schema="schema"
+    :state="state"
+    class="space-y-4"
+    @submit="onSubmit"
+  >
     <UAlert
       v-if="errorMessage"
       color="error"
@@ -101,7 +106,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         size="xl"
         name="firstName"
       >
-        <UInput placeholder="Иван" class="w-full" v-model="state.firstName" />
+        <UInput
+          placeholder="Иван"
+          class="w-full"
+          v-model="state.firstName"
+        />
       </UFormField>
 
       <UFormField
@@ -125,7 +134,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         hint="Опционально"
         name="surName"
       >
-        <UInput placeholder="Иванович" class="w-full" v-model="state.surName" />
+        <UInput
+          placeholder="Иванович"
+          class="w-full"
+          v-model="state.surName"
+        />
       </UFormField>
 
       <UFormField
@@ -135,9 +148,16 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         label="Снилс"
         name="lastName"
       >
-        <PinInput id="pin-input" v-model="snils" @complete="snilsComp">
+        <PinInput
+          id="pin-input"
+          v-model="snils"
+          @complete="snilsComp"
+        >
           <PinInputGroup class="gap-1">
-            <template v-for="(id, index) in 11" :key="id">
+            <template
+              v-for="(id, index) in 11"
+              :key="id"
+            >
               <PinInputInput
                 class="rounded-md p-1 w-[30px] text-center border"
                 :index="index"
@@ -253,9 +273,18 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         label="Пол"
         name="gender"
       >
-        <USelect v-model="state.gender" :items="genders" class="w-48" />
+        <USelect
+          v-model="state.gender"
+          :items="genders"
+          class="w-48"
+        />
       </UFormField>
     </div>
-    <UButton size="xl" type="submit"> Зарегистрироваться </UButton>
+    <UButton
+      size="xl"
+      type="submit"
+    >
+      Зарегистрироваться
+    </UButton>
   </UForm>
 </template>

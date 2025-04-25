@@ -48,7 +48,12 @@ console.log(services.value);
             <span class="font-bold text-xl">
               {{ service.price ? service.price + " ₽" : "Беслпатно" }}
             </span>
-            <UButton size="xl" color="secondary"> Записаться</UButton>
+            <UButton
+              size="xl"
+              color="secondary"
+            >
+              Записаться</UButton
+            >
           </div>
         </template>
       </CardCategory>

@@ -2,7 +2,11 @@
   <footer class="bg-[#f2f2f2] text-[#333] py-5">
     <div class="flex container mx-auto gap-10 items-start">
       <div class="flex flex-col justify-start items-start gap-4">
-        <img class="h-40" src="/logo4.png" alt="Logo" />
+        <img
+          class="h-40"
+          src="/logo4.png"
+          alt="Logo"
+        />
         <h1 class="text-2xl text-[#333] bottom-6 font-bold">Контакты</h1>
         <span class="text-xl text-[#333] bottom-2.5">
           <span class="text-xl text-[#333] bottom-2.5 font-bold" />
@@ -12,7 +16,11 @@
 
         <span class="text-xl text-[#333] bottom-2.5">
           <span class="font-bold">Телефон:</span>
-          <a href="tel:+78009858045" class="underline">+7 (800) 985-80-45</a>
+          <a
+            href="tel:+78009858045"
+            class="underline"
+            >+7 (800) 985-80-45</a
+          >
         </span>
         <span class="text-xl text-[#333] bottom-2.5">
           <span class="font-bold">Электронная почта:</span> sp22@zdrav.mos.ru
@@ -24,9 +32,16 @@
 
       <div class="flex flex-col gap-4 ml-auto mt-15">
         <div class="flex items-center">
-          <Icon name="carbon:phone-voice" size="2rem" />
+          <Icon
+            name="carbon:phone-voice"
+            size="2rem"
+          />
           <span class="font-bold text-xl ml-2">
-            <a href="tel:+78009858045" class="underline">+7 (800) 985-80-45</a>
+            <a
+              href="tel:+78009858045"
+              class="underline"
+              >+7 (800) 985-80-45</a
+            >
           </span>
         </div>
 
@@ -38,10 +53,20 @@
 
         <span class="font-bold text-xl">Мы в социальных сетях</span>
         <div class="flex items-center gap-3 self-center">
-          <a href=""><Icon name="logos:whatsapp-icon" size="2rem" /></a>
-          <a href=""><Icon name="lineicons:vk" size="2rem" /></a>
+          <a href=""
+            ><Icon
+              name="logos:whatsapp-icon"
+              size="2rem"
+          /></a>
+          <a href=""
+            ><Icon
+              name="lineicons:vk"
+              size="2rem"
+          /></a>
           <a href="https://t.me/escapefromtarkovRU"
-            ><Icon name="logos:telegram" size="2rem"
+            ><Icon
+              name="logos:telegram"
+              size="2rem"
           /></a>
         </div>
       </div>
