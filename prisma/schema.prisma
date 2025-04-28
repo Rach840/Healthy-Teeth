@@ -22,6 +22,20 @@ model Category {
   services    Services[]
 }
 
+model Doctors {
+  id          Int     @id @default(autoincrement())
+  firstName   String
+  image       String
+  surName     String?
+  lastName    String
+  password    String
+  email       String  @unique
+  description Json
+  categoryId  Int
+  experience  String
+  post        String
+}
+
 model Services {
   id           Int      @id @default(autoincrement())
   name         String
@@ -30,6 +44,8 @@ model Services {
   categoryName String
   category     Category @relation(fields: [categoryName], references: [name])
   description  Json?
+  doctorId     Int
+  dates        Json     @default("[]")
 }
 
 model Users {
@@ -46,10 +62,11 @@ model Users {
 }
 
 model Records {
-  id        Int @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   doctorId  Int
   serviceId Int
   userId    Int
+  date      DateTime
 }
 
 enum Gender {

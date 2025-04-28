@@ -45,11 +45,12 @@
           </span>
         </div>
 
-        <button
-          class="bg-blue-500 py-6 px-7 text-lg hover:bg-blue-600 duration-500 self-end"
+        <UButton
+          size="xl"
+          color="info"
+          class="cursor-pointer px-9 py-6 text-xl"
+          >Перезвоните мне</UButton
         >
-          Перезвоните мне
-        </button>
 
         <span class="font-bold text-xl">Мы в социальных сетях</span>
         <div class="flex items-center gap-3 self-center">

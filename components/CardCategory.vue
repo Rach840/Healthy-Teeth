@@ -1,10 +1,11 @@
 <template>
-  <UCard class="bg-gray-100 w-[400px]">
+  <UCard class="bg-gray-100">
     <article class="space-y-4">
       <div class="w-full">
         <slot name="image"></slot>
       </div>
       <h3 class="text-2xl"><slot name="categoryTitle"></slot></h3>
+      <slot></slot>
       <ul class="space-y-3">
         <slot name="servicesList"></slot>
       </ul>

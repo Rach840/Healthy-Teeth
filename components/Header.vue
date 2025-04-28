@@ -1,3 +1,12 @@
+<script setup lang="ts">
+const { user, clear: clearSession } = useUserSession();
+
+async function logout() {
+  await clearSession();
+  await navigateTo("/login");
+}
+</script>
+
 <template>
   <header
     class="flex bg-white items-center justify-between scroll-smooth px-10 py-4 shadow sticky t-0 z-50"
@@ -11,10 +20,26 @@
     </div>
     <nav class="flex items-center">
       <div class="flex items-center space-x-4">
-        <NuxtLink to="/">О клинике</NuxtLink>
-        <NuxtLink to="/categories">Услуги</NuxtLink>
-        <NuxtLink to="/doctors">Врачи</NuxtLink>
-        <NuxtLink to="/contacts">Контакты</NuxtLink>
+        <NuxtLink
+          class="underline text-lg"
+          to="/"
+          >О клинике</NuxtLink
+        >
+        <NuxtLink
+          class="underline text-lg"
+          to="/categories"
+          >Услуги</NuxtLink
+        >
+        <NuxtLink
+          class="underline text-lg"
+          to="/doctors"
+          >Врачи</NuxtLink
+        >
+        <NuxtLink
+          class="underline text-lg"
+          to="/contacts"
+          >Контакты</NuxtLink
+        >
         <span class="font-bold text-black"> +7 (800) 985-80-45 </span>
         <a href=""
           ><Icon
@@ -33,18 +58,63 @@
         /></a>
         <UButton
           size="xl"
-          color="secondary"
+          color="info"
+          class="cursor-pointer"
           >Перезвоните мне</UButton
         >
-        <!--        <button-->
-        <!--          class="bg-blue-500 py-6 text-lg hover:bg-blue-600 duration-200 px-7"-->
-        <!--        ></button>-->
-        <img
-          src="/user.png"
-          class="w-[32px]"
-          alt="User"
-        />
-        <a href="#">Войти</a>
+        <UButton
+          size="xl"
+          v-if="!user"
+          variant="link"
+          color="info"
+          to="/login"
+          class="cursor-pointer underline text-xl"
+        >
+          <img
+            src="/user.png"
+            class="w-[32px]"
+            alt="User"
+          />
+          Войти
+        </UButton>
+        <UPopover v-if="user">
+          <UButton
+            size="xl"
+            variant="link"
+            color="info"
+            class="cursor-pointer text-xl"
+          >
+            <img
+              src="/user.png"
+              class="w-[32px]"
+              alt="User"
+            />
+            {{ user?.firstName }}
+          </UButton>
+
+          <template #content>
+            <div class="flex flex-col">
+              <UButton
+                size="xl"
+                variant="link"
+                to="/profile"
+                color="primary"
+                class="cursor-pointer"
+              >
+                Профиль
+              </UButton>
+              <UButton
+                size="xl"
+                variant="link"
+                color="primary"
+                @click="logout"
+                class="cursor-pointer"
+              >
+                Выйти
+              </UButton>
+            </div>
+          </template>
+        </UPopover>
       </div>
     </nav>
   </header>

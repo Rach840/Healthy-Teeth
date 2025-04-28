@@ -25,7 +25,7 @@ console.log(services.value);
       </template>
     </UCard>
     <div
-      class="lg:py-8 flex flex-wrap justify-center items-stretch w-full gap-6 text-center text-black"
+      class="lg:py-8 grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 w-full text-center text-black"
     >
       <CardCategory v-for="service in services?.services">
         <template #image>
@@ -50,7 +50,8 @@ console.log(services.value);
             </span>
             <UButton
               size="xl"
-              color="secondary"
+              class="cursor-pointer"
+              color="info"
             >
               Записаться</UButton
             >

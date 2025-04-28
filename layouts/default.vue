@@ -1,6 +1,8 @@
 <template>
-  <Header />
-  <slot />
-  <Footer />
+  <UApp>
+    <Header />
+    <slot />
+    <Footer />
+  </UApp>
 </template>
 <script setup lang="ts"></script>

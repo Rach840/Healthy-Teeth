@@ -1,4 +1,8 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+definePageMeta({
+  middleware: ["unauthenticated"],
+});
+</script>
 
 <template>
   <UContainer class="py-8">
@@ -8,7 +12,17 @@
         <h3 class="text-xl">Зарегистрируйтесь чтобы иметь доступ к записи</h3>
       </template>
       <template #default>
-        <RegistrationForm />
+        <div class="space-y-4">
+          <RegistrationForm />
+          <p class="text-xl">
+            Вы уже зарегистрированы?
+            <NuxtLink
+              class="cursor-pointer underline"
+              to="/login"
+              >Войдите</NuxtLink
+            >
+          </p>
+        </div>
       </template>
     </UCard>
   </UContainer>

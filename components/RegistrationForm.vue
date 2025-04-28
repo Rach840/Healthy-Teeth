@@ -153,7 +153,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         required
         size="xl"
         label="Снилс"
-        name="lastName"
+        name="snils"
       >
         <PinInput
           id="pin-input"
@@ -220,7 +220,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         <UPopover>
           <UButton
             color="neutral"
-            class="w-full p-2.5"
+            class="w-full p-2.5 cursor-pointer"
             variant="subtle"
             icon="i-lucide-calendar"
           >
@@ -238,6 +238,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                 (v) => {
                   if (v) {
                     dataMessage = v.toString();
+
                     state.birth = toDate(v);
                   } else {
                     state.birth = undefined;
@@ -266,6 +267,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
               color="neutral"
               variant="link"
               size="xl"
+              class="cursor-pointer"
               :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'"
               :aria-label="show ? 'Hide password' : 'Show password'"
               :aria-pressed="show"
@@ -291,6 +293,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     <UButton
       size="xl"
       type="submit"
+      color="info"
+      class="cursor-pointer"
     >
       Зарегистрироваться
     </UButton>

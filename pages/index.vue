@@ -56,7 +56,7 @@ const items = ref<AccordionItem[]>([
           to="/categories"
           class="py-6 px-6 text-2xl"
           size="xl"
-          color="secondary"
+          color="info"
           >Перезвоните мне</UButton
         >
         <!--        <button-->
@@ -115,7 +115,7 @@ const items = ref<AccordionItem[]>([
     <section class="py-8 bg-white container mx-auto relative px-6">
       <h2 class="text-4xl font-bold text-center mb-10">Услуги</h2>
       <div
-        class="lg:py-8 lg:px-24 flex flex-wrap justify-center items-stretch w-full gap-6 text-center text-black"
+        class="lg:py-8 lg:px-24 grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 text-center text-black"
       >
         <CardCategory
           v-if="status === 'success'"
@@ -139,9 +139,9 @@ const items = ref<AccordionItem[]>([
         </CardCategory>
       </div>
       <UButton
-        class="relative left-5/6"
+        class="relative cursor-pointer left-5/6"
         trailing-icon="i-lucide-arrow-right"
-        color="secondary"
+        color="info"
         to="/categories"
         size="xl"
         >Перейти к услугам</UButton

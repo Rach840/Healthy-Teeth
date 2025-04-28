@@ -8,9 +8,15 @@ export default defineAppConfig({
         footer: "p-2 sm:px-4",
       },
     },
-    colors: {
-      primary: "blue",
-      neutral: "neutral",
+
+    button: {
+      compoundVariants: [
+        {
+          size: "xl",
+          square: true,
+          class: "p-3",
+        },
+      ],
     },
   },
 });

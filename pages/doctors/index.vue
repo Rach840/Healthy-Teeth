@@ -1,26 +1,31 @@
 <script lang="ts" setup>
-const { data: categories, status } = await useFetch("/api/category");
+const { data: doctors, status } = await useFetch("/api/doctors/getAllDoctors");
 </script>
 <template>
   <UContainer class="py-16">
-    <h2 class="text-4xl font-bold mb-6 text-center">Наши услуги</h2>
+    <h2 class="text-4xl font-bold mb-6 text-center">Наши специалисты</h2>
     <div class="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       <CardCategory
         v-if="status === 'success'"
-        v-for="category in categories"
+        v-for="doctor in doctors"
       >
         <template #image>
           <img
-            :src="category.image"
-            class="w-full h-[230px] object-cover"
+            :src="doctor.image"
+            class="w-full h-[450px] object-top object-cover"
             alt=""
           />
         </template>
-        <template #categoryTitle>{{ category.name }}</template>
+        <template #categoryTitle>{{
+          doctor.firstName + " " + doctor.lastName + " " + doctor.surName
+        }}</template>
+        <template #default>
+          <h3 class="text-xl">Стаж: {{ doctor.experience }}</h3>
+        </template>
         <template #servicesList>
           <li
             class="text-xl underline"
-            v-for="service in category.services"
+            v-for="service in doctor.services"
           >
             {{ service.name }}
           </li>
@@ -28,12 +33,12 @@ const { data: categories, status } = await useFetch("/api/category");
         <template #footer>
           <UButton
             trailing-icon="i-lucide-arrow-right"
-            :to="`/categories/services/${category.id}`"
+            :to="`/doctors/doctor/${doctor?.id}`"
             color="info"
             class="cursor-pointer"
             size="xl"
           >
-            Подбробнее о категории
+            Подробнее
           </UButton>
         </template>
       </CardCategory>
