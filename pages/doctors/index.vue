@@ -1,5 +1,8 @@
 <script lang="ts" setup>
-const { data: doctors, status } = await useFetch("/api/doctors/getAllDoctors");
+const config = useRuntimeConfig();
+const { data: doctors, status } = await useFetch(
+  `${config.public.apiUrl}/doctors/`,
+);
 </script>
 <template>
   <UContainer class="py-16">

@@ -8,15 +8,5 @@ export default defineAppConfig({
         footer: "p-2 sm:px-4",
       },
     },
-
-    button: {
-      compoundVariants: [
-        {
-          size: "xl",
-          square: true,
-          class: "p-3",
-        },
-      ],
-    },
   },
 });

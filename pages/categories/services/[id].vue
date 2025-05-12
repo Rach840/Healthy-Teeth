@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 const route = useRoute();
-console.log(route.params);
-const { data: services } = await useFetch(`/api/services/${route.params.id}`);
-
-console.log(services.value);
+const config = useRuntimeConfig();
+const { data: services } = await useFetch(
+  `${config.public.apiUrl}/category/${route.params.id}`,
+);
+console.log(services);
 </script>
 <template>
   <UContainer class="py-12 space-y-8">
@@ -48,13 +49,20 @@ console.log(services.value);
             <span class="font-bold text-xl">
               {{ service.price ? service.price + " ₽" : "Беслпатно" }}
             </span>
-            <UButton
-              size="xl"
-              class="cursor-pointer"
-              color="info"
+            <BuyModal
+              :product="{
+                id: service.id,
+                title: service.name,
+                doctorId: service.doctorId,
+              }"
             >
-              Записаться</UButton
-            >
+              <UButton
+                color="info"
+                variant="solid"
+                size="xl"
+                >Записаться</UButton
+              >
+            </BuyModal>
           </div>
         </template>
       </CardCategory>

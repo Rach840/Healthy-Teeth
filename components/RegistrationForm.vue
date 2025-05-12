@@ -15,6 +15,7 @@ import { Calendar } from "~/components/ui/calendar";
 import { toDate } from "reka-ui/date";
 
 const router = useRouter();
+const config = useRuntimeConfig();
 const phoneRegex = new RegExp(
   /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/,
 );
@@ -32,12 +33,13 @@ const value = computed({
   get: () => (dataMessage.value ? parseDate(dataMessage.value) : undefined),
   set: (val) => val,
 });
+const toast = useToast();
+
 const dataMessage = ref("");
 const snils = ref<string[]>([]);
 const snilsComp = () => {
   state.snils = snils.value.join("");
 };
-const errorMessage = ref<string>("");
 const df = new DateFormatter("ru-RU", {
   dateStyle: "long",
 });
@@ -75,18 +77,26 @@ const state = reactive<Partial<Schema>>({
 });
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  const resp: { succes: boolean; message?: string } = await $fetch(
-    "/api/users/create",
-    {
-      method: "post",
-      body: { user: event.data },
-    },
-  );
-  if (resp.succes) {
-    await router.push("/");
+  const resp: Response = await $fetch(`${config.public.apiUrl}/users/create`, {
+    method: "post",
+    body: JSON.stringify({ user: event.data }),
+  });
+  if (resp.status === 201) {
+    await router.push("/login");
   }
-  if (resp.message) {
-    errorMessage.value = resp.message;
+  if (resp.status === 422) {
+    toast.add({
+      title: "Пользователь с такой электронной почтой существует",
+      color: "error",
+      icon: "i-lucide-circle-x",
+    });
+  } else {
+    toast.add({
+      title: "Не предвидимая ошибка",
+      color: "error",
+      description: "Разработчик уже чинит ошибочку.",
+      icon: "i-lucide-circle-x",
+    });
   }
 }
 </script>
@@ -97,14 +107,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     class="space-y-4"
     @submit="onSubmit"
   >
-    <UAlert
-      v-if="errorMessage"
-      color="error"
-      :title="errorMessage"
-      class="w-full"
-      description="Поменяйте электронную почту или войдите"
-      icon="i-lucide-terminal"
-    />
     <div class="grid grid-cols-2 gap-6">
       <UFormField
         class="col-span-1"

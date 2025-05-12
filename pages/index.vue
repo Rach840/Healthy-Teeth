@@ -1,7 +1,11 @@
 <script lang="ts" setup>
 import type { AccordionItem } from "@nuxt/ui";
 
-const { data: categories, status } = await useFetch("/api/category");
+const config = useRuntimeConfig();
+const { data: categories, status } = await useFetch(
+  `${config.public.apiUrl}/category`,
+);
+
 const mockAdvantages = [
   {
     image: "/забота.png",

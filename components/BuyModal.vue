@@ -6,13 +6,16 @@ import {
 } from "@internationalized/date";
 import { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
+import { useAuthStore } from "~/stores/auth";
 
-const { user } = useUserSession();
+const store = useAuthStore();
+const user = store.user;
 
 const { product } = defineProps<{
   product: {
-    id: string;
+    id: number;
     title: string;
+    doctorId: number;
   };
 }>();
 
@@ -52,7 +55,7 @@ type Schema = z.output<typeof schema>;
 const toast = useToast();
 
 const config = useRuntimeConfig();
-function onSubmit(event: FormSubmitEvent<Schema>) {
+async function onSubmit(event: FormSubmitEvent<Schema>) {
   isOpen.value = false;
   const date = event.data.date.toDate(getLocalTimeZone());
   const time = event.data.time.split(":");
@@ -63,13 +66,17 @@ function onSubmit(event: FormSubmitEvent<Schema>) {
     1000 * 60 * 60 * 3;
 
   try {
-    $fetch(`${config.public.apiUrl}/orders`, {
+    await $fetch(`${config.public.apiUrl}/users/setOrder`, {
       method: "POST",
       body: JSON.stringify({
         time: new Date(parsedTime).toISOString(),
         productId: product.id,
+        doctorId: product.doctorId,
       }),
       credentials: "include",
+      headers: new Headers({
+        "Authorization": `Bearer ${store?.token}`,
+      }),
     });
     toast.add({
       title: "Услуга успешно оформлена",

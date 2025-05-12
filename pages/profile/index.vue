@@ -1,10 +1,18 @@
 <script setup lang="ts">
 import type { TabsItem } from "@nuxt/ui";
+import { useAuthStore } from "~/stores/auth";
 
 definePageMeta({
   middleware: ["authenticated"],
 });
-const { user } = useUserSession();
+const store = useAuthStore();
+onMounted(async () => {
+  await store.checkAuth();
+});
+const user = ref(store.user);
+watchEffect(() => {
+  user.value = store.user;
+});
 const openPasswordEdit = ref(false);
 const edited = ref<boolean>(false);
 function updateOpen() {

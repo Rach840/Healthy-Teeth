@@ -6,6 +6,7 @@ const showNewPassword = ref(false);
 const showCurrentPassword = ref(false);
 const errorPasswordMessage = ref("");
 const toast = useToast();
+const store = useAuthStore();
 
 const schemaUpdatePassword = z.object({
   currentPassword: z.string().min(8, "Минимум 8  символов"),
@@ -19,32 +20,42 @@ const stateUpdatePassword = reactive<Partial<SchemaUpdatePassword>>({
   newPassword: undefined,
   confirmPassword: undefined,
 });
+const config = useRuntimeConfig();
 async function onSubmitUpdatePassword(
   event: FormSubmitEvent<SchemaUpdatePassword>,
 ) {
-  console.log(event.data);
   if (event.data.newPassword != event.data.confirmPassword) {
     errorPasswordMessage.value = "Пароли не совпадают";
     return;
   }
-  const resp: { succes: boolean; message?: string } = await $fetch(
-    "/api/users/updatePassword",
+  const resp: Response = await $fetch(
+    `${config.public.apiUrl}/users/updatePassword`,
     {
       method: "patch",
-      body: {
+      body: JSON.stringify({
         currentPassword: event.data.currentPassword,
         newPassword: event.data.newPassword,
-      },
+      }),
     },
   );
-  if (resp.succes) {
+  if (resp.status === 201) {
     updateOpen();
+    await store.refresh();
     toast.add({
       title: "Ваш пароль изменен.",
+      icon: "i-lucide-check",
+      color: "success",
     });
   }
-  if (resp.message) {
+  if (resp.status === 403) {
     errorPasswordMessage.value = resp.message;
+  } else {
+    toast.add({
+      title: "Не предвидимая ошибка.",
+      description: "Разработчик уже чинит ошибочку.",
+      color: "error",
+      icon: "i-lucide-circle-x",
+    });
   }
 }
 </script>

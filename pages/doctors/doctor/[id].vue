@@ -1,8 +1,8 @@
 <script setup lang="ts">
 const route = useRoute();
-console.log(route.params);
+const config = useRuntimeConfig();
 const { data: doctor } = await useFetch(
-  `/api/doctors/doctor/${route.params.id}`,
+  `${config.public.apiUrl}/doctors/${route.params.id}`,
 );
 const description = ref(JSON.parse(doctor.value.description));
 </script>

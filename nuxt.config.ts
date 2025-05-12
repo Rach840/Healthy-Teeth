@@ -35,5 +35,8 @@ export default defineNuxtConfig({
       },
     ],
   },
-  modules: ["@nuxt/icon", "@nuxt/ui", "nuxt-auth-utils"],
+  runtimeConfig: {
+    public: { apiUrl: "http://localhost:8080/api" },
+  },
+  modules: ["@nuxt/icon", "@nuxt/ui", "@pinia/nuxt"],
 });

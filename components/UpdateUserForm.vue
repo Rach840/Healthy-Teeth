@@ -11,13 +11,14 @@ import {
 import { toDate } from "reka-ui/date";
 import { Calendar } from "~/components/ui/calendar";
 
+const config = useRuntimeConfig();
 const toast = useToast();
-
+const { refresh } = useAuthStore();
 // Проброска переменных с родительского элемента
 const { updateOpen } = inject("openPasswordEdit");
 const { edited } = inject("editForm");
 const { user } = inject("user");
-
+console.log(user);
 const schema = z.object({
   email: z.string().email("Invalid email"),
   surName: z
@@ -60,9 +61,8 @@ const state = reactive<Partial<Schema>>({
 });
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  console.log(event.data);
-  const resp: { succes: boolean; message?: string } = await $fetch(
-    "/api/users/updateUserInfo",
+  const resp: Response = await $fetch(
+    `${config.public.apiUrl}/users/updateUserInfo`,
     {
       method: "patch",
       body: {
@@ -70,9 +70,19 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       },
     },
   );
-  if (resp.succes) {
+  if (resp.status === 201) {
     toast.add({
       title: "Ваши данные успешные изменены.",
+      icon: "i-lucide-check",
+      color: "success",
+    });
+    await refresh();
+  } else {
+    toast.add({
+      title: "Не предвидимая ошибка",
+      color: "error",
+      description: "Разработчик уже чинит ошибочку.",
+      icon: "i-lucide-circle-x",
     });
   }
 }
@@ -224,7 +234,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                   if (v) {
                     dateMessage = v.toString();
                     state.birth = toDate(v);
-                    console.log(dateMessage, v);
                   } else {
                     state.birth = undefined;
                   }

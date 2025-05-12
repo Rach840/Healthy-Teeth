@@ -1,8 +1,14 @@
 <script setup lang="ts">
-const { user, clear: clearSession } = useUserSession();
+import { useAuthStore } from "~/stores/auth";
 
+const store = useAuthStore();
+const user = ref(null);
+watchEffect(async () => {
+  user.value = store.user;
+});
+console.log("headerUser", user);
 async function logout() {
-  await clearSession();
+  await store.logout();
   await navigateTo("/login");
 }
 </script>
@@ -26,20 +32,42 @@ async function logout() {
           >О клинике</NuxtLink
         >
         <NuxtLink
+          v-if="user?.role == 'ADMIN'"
+          class="underline text-lg"
+          to="/admin/categories"
+          >Категории
+        </NuxtLink>
+        <NuxtLink
+          v-else
           class="underline text-lg"
           to="/categories"
-          >Услуги</NuxtLink
-        >
+          >Услуги
+        </NuxtLink>
         <NuxtLink
           class="underline text-lg"
           to="/doctors"
-          >Врачи</NuxtLink
         >
+          Врачи
+        </NuxtLink>
         <NuxtLink
+          v-if="user?.role != 'ADMIN'"
           class="underline text-lg"
           to="/contacts"
-          >Контакты</NuxtLink
-        >
+          >Контакты
+        </NuxtLink>
+        <NuxtLink
+          v-if="user?.role == 'ADMIN'"
+          class="underline text-lg"
+          to="/admin/users"
+          >Пользователи
+        </NuxtLink>
+
+        <NuxtLink
+          v-if="user?.role == 'ADMIN'"
+          class="underline text-lg"
+          to="/admin/orders"
+          >Записи
+        </NuxtLink>
         <span class="font-bold text-black"> +7 (800) 985-80-45 </span>
         <a href=""
           ><Icon

@@ -1,5 +1,8 @@
 <script lang="ts" setup>
-const { data: categories, status } = await useFetch("/api/category");
+const config = useRuntimeConfig();
+const { data: categories, status } = await useFetch(
+  `${config.public.apiUrl}/category`,
+);
 </script>
 <template>
   <UContainer class="py-16">
