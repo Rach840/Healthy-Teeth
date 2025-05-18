@@ -229,7 +229,7 @@ const expanded = ref({});
 <template>
   <div class="container mx-auto">
     <h1 class="text-md sm:text-lg md:text-2xl lg:text-4xl font-bold mb-6">
-      Главная
+      Категории
     </h1>
     <UCard
       :ui="{

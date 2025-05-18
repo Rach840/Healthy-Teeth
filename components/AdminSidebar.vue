@@ -8,8 +8,21 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { SidebarFooter } from "~/components/ui/sidebar";
 
-// Menu items.
+import { useAuthStore } from "~/stores/auth";
+
+const store = useAuthStore();
+const user = ref(null);
+watchEffect(async () => {
+  user.value = store.user;
+});
+console.log("headerUser", user);
+async function logout() {
+  await store.logout();
+  await navigateTo("/login");
+}
+
 const items = [
   {
     title: "Главная",
@@ -77,13 +90,54 @@ const items = [
         </SidebarGroupContent>
       </SidebarGroup>
     </SidebarContent>
+    <SidebarFooter>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <UPopover
+            :ui="{
+              content: 'w-full',
+            }"
+            class="w-full"
+          >
+            <UButton
+              size="xl"
+              color="neutral"
+              variant="subtle"
+              class="cursor-pointer w-full text-xl"
+            >
+              <img
+                src="/user.png"
+                class="w-[52px]"
+                alt="User"
+              />
+              {{ user?.firstName }}
+            </UButton>
+            <template #content>
+              <div class="w-full px-6 py-2">
+                <UButton
+                  size="xl"
+                  variant="link"
+                  to="/"
+                  color="primary"
+                  class="cursor-pointer w-full text-xl"
+                >
+                  Выйти на сайт
+                </UButton>
+                <UButton
+                  size="xl"
+                  variant="link"
+                  color="primary"
+                  @click="logout"
+                  class="cursor-pointer w-full text-xl"
+                >
+                  Выйти
+                </UButton>
+              </div>
+            </template>
+          </UPopover>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarFooter>
   </Sidebar>
 </template>
-<style>
-@media print {
-  /* Hide elements not needed for printing */
-  .no-print {
-    display: none !important;
-  }
-}
-</style>
+<style></style>

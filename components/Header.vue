@@ -32,13 +32,7 @@ async function logout() {
           >О клинике</NuxtLink
         >
         <NuxtLink
-          v-if="user?.role == 'ADMIN'"
-          class="underline text-lg"
-          to="/admin/categories"
-          >Категории
-        </NuxtLink>
-        <NuxtLink
-          v-else
+          v-if="user?.role != 'ADMIN'"
           class="underline text-lg"
           to="/categories"
           >Услуги
@@ -55,19 +49,14 @@ async function logout() {
           to="/contacts"
           >Контакты
         </NuxtLink>
-        <NuxtLink
-          v-if="user?.role == 'ADMIN'"
-          class="underline text-lg"
-          to="/admin/users"
-          >Пользователи
-        </NuxtLink>
 
         <NuxtLink
           v-if="user?.role == 'ADMIN'"
           class="underline text-lg"
-          to="/admin/orders"
-          >Записи
+          to="/admin/"
+          >Админ панель
         </NuxtLink>
+
         <span class="font-bold text-black"> +7 (800) 985-80-45 </span>
         <a href=""
           ><Icon

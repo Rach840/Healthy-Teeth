@@ -215,7 +215,7 @@ async function deleteOrder() {
       </p>
     </div>
 
-    <UCard>
+    <UCard class="mb-6">
       <template #header>
         <div class="flex justify-between items-center flex-wrap">
           <h2 class="text-3xl">Запись номер - №{{ order?.id }}</h2>
@@ -325,47 +325,54 @@ async function deleteOrder() {
               </div>
             </div>
           </div>
-          <div class="">
-            <h3 class="text-2xl font-semibold mb-4">
-              Другие записи пользователя
-            </h3>
+        </div>
+      </template>
+    </UCard>
+    <UCard class="">
+      <template #header>
+        <div class="flex p-2 justify-between items-start p-2">
+          <h3 class="text-2xl font-semibold mb-4">
+            Другие записи пользователя
+          </h3>
 
-            <UTable
-              v-model:sorting="sorting"
-              :data="order?.userOtherOrders"
-              ref="table"
-              sticky
-              v-model:pagination="pagination"
-              :pagination-options="{
-                getPaginationRowModel: getPaginationRowModel(),
-              }"
-              :loading="loading"
-              loading-color="info"
-              loading-animation="carousel"
-              :columns="columns"
-              v-model:global-filter="globalFilter"
-              class="print-table"
-            >
-              <template #expanded="{ row }">
-                <pre>{{ row.original }}</pre>
-              </template>
-            </UTable>
-            <div
-              class="flex justify-center border-t border-default pt-4 no-print"
-            >
-              <UPagination
-                :default-page="
-                  (table?.tableApi?.getState().pagination.pageIndex || 0) + 1
-                "
-                :items-per-page="
-                  table?.tableApi?.getState().pagination.pageSize
-                "
-                :total="table?.tableApi?.getFilteredRowModel().rows.length"
-                @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)"
-                active-color="info"
-              />
-            </div>
-          </div>
+          <ExportButton
+            :column-labels="columnExportLabels"
+            :name="`Пользователи записанные на услугу ${serviceFullInfo?.service.name}`"
+            :data="serviceFullInfo?.ordersByService || [{}]"
+          />
+        </div>
+      </template>
+      <template #default>
+        <UTable
+          v-model:sorting="sorting"
+          :data="order?.userOtherOrders"
+          ref="table"
+          sticky
+          v-model:pagination="pagination"
+          :pagination-options="{
+            getPaginationRowModel: getPaginationRowModel(),
+          }"
+          :loading="loading"
+          loading-color="info"
+          loading-animation="carousel"
+          :columns="columns"
+          v-model:global-filter="globalFilter"
+          class="print-table"
+        >
+          <template #expanded="{ row }">
+            <pre>{{ row.original }}</pre>
+          </template>
+        </UTable>
+        <div class="flex justify-center border-t border-default pt-4 no-print">
+          <UPagination
+            :default-page="
+              (table?.tableApi?.getState().pagination.pageIndex || 0) + 1
+            "
+            :items-per-page="table?.tableApi?.getState().pagination.pageSize"
+            :total="table?.tableApi?.getFilteredRowModel().rows.length"
+            @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)"
+            active-color="info"
+          />
         </div>
       </template>
     </UCard>

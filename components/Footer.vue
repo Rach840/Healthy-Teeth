@@ -1,5 +1,5 @@
 <template>
-  <footer class="bg-[#f2f2f2] text-[#333] py-5">
+  <footer class="bg-[#f2f2f2] text-[#333] py-5 no-print">
     <div class="flex container mx-auto gap-10 items-start">
       <div class="flex flex-col justify-start items-start gap-4">
         <img
