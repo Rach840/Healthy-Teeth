@@ -51,6 +51,23 @@ interface Order {
   date: Date;
   status: "WAITING" | "PROVIDED";
 }
+export interface Service {
+  id: number;
+  name: string;
+  image: string;
+  price: number;
+  categoryName: string;
+  description: JsonValue | null;
+  doctorId: number;
+}
+export interface ServiceFullInfo {
+  service: Service;
+  doctor: Doctor;
+  lastOrder: Order;
+  ordersByService: OrderWithUser[];
+  ordersSum: number;
+}
+export interface OrderWithUser extends User, Order {}
 export interface orderFullInfo {
   id: number;
   status: $Enums.Status;

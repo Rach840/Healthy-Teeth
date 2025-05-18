@@ -1,43 +1,52 @@
 <script setup lang="ts">
-import type { orderFullInfo, OrdersTable, User } from "~/lib/types";
+import { Edit, Trash2 } from "lucide-vue-next";
+import type { OrderWithUser, ServiceFullInfo, User } from "~/lib/types";
+import { type Column, getPaginationRowModel } from "@tanstack/vue-table";
 import { h, resolveComponent } from "vue";
+import {
+  getHeaderButtonProps,
+  getHeaderDropDownProps,
+  sorting,
+} from "~/lib/getHeader";
 import type { TableColumn } from "@nuxt/ui";
-import type { Column } from "@tanstack/vue-table";
-import { getPaginationRowModel } from "@tanstack/vue-table";
 
 definePageMeta({
   layout: ["admin"],
   middleware: ["admin"],
 });
+const config = useRuntimeConfig();
+const { token, isAuthenticated } = useAuthStore();
 const table = useTemplateRef("table");
 const UBadge = resolveComponent("UBadge");
 const UButton = resolveComponent("UButton");
 const UDropdownMenu = resolveComponent("UDropdownMenu");
-const config = useRuntimeConfig();
-const { token, isAuthenticated } = useAuthStore();
-const order = ref<orderFullInfo | null>(null);
-const loading = ref(true);
+const serviceFullInfo = ref<ServiceFullInfo | null>(null);
 const route = useRoute();
-const router = useRouter();
-const toast = useToast();
+const loading = ref<boolean>(true);
 watchEffect(async () => {
   if (isAuthenticated) {
-    const { data: ordersResp, status } = await useFetch(
-      `${config.public.apiUrl}/admin/categories/${route.params.id}`,
-      {
-        method: "GET",
-        headers: new Headers({
-          "Authorization": "Bearer " + token,
-        }),
-      },
-    );
-    console.log(ordersResp.value, status);
-    order.value = ordersResp.value;
-    loading.value = false;
+    const { status: statusResp, data: serviceResp } =
+      await useFetch<ServiceFullInfo>(
+        `${config.public.apiUrl}/admin/serviceOne/${route.params.id}`,
+        {
+          method: "GET",
+          headers: new Headers({
+            "Authorization": "Bearer " + token,
+          }),
+        },
+      );
+    serviceFullInfo.value = serviceResp.value;
+    loading.value = statusResp.value;
   }
 });
-const orderDate = computed(() => {
-  return new Date(order.value?.date).toLocaleString("ru-RU", {
+
+watch(loading, () => {
+  console.log("stat", loading);
+  console.log("stat", serviceFullInfo.value);
+});
+const lastOrderDate = computed(() => {
+  if (!serviceFullInfo.value?.lastOrder) return "Нету";
+  return new Date(serviceFullInfo.value?.lastOrder).toLocaleString("ru-RU", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -49,24 +58,67 @@ const orderDate = computed(() => {
 
 const columnLabels: Record<string, string> = {
   id: "ID",
-  serviceName: "Название услуги",
+  userFullName: "ФИО пользователя",
+  phone: "Телефон пользователя",
+  email: "Почта пользователя",
+  gender: "Пол пользователя",
   status: "Статус",
   date: "Дата",
+};
+const columnExportLabels: Record<string, string> = {
+  id: "ID заказа",
+  doctorId: "ID доктора",
+  serviceId: "ID услуги",
+  userId: "ID пользователя",
+  createdAt: "Дата создание заказа",
   price: "Цена",
+  firstName: "Имя пользователя",
+  lastName: "Фамилия пользователя",
+  surName: "Отчество пользователя",
+  phone: "Телефон пользователя",
+  email: "Почта пользователя",
+  gender: "Пол пользователя",
+  birth: "День рождения пользователя",
+  status: "Статус",
+  date: "Дата",
 };
 
-const columns: TableColumn<OrdersTable>[] = [
+function getHeader(column: Column<User>, label: string) {
+  const isSorted = column.getIsSorted();
+
+  return h(UDropdownMenu, getHeaderDropDownProps(isSorted, column), () =>
+    h(UButton, getHeaderButtonProps(isSorted, label)),
+  );
+}
+const columns: TableColumn<OrderWithUser>[] = [
   {
     accessorKey: "id",
     header: ({ column }) => getHeader(column, columnLabels["id"]),
   },
   {
-    accessorKey: "serviceName",
-    header: ({ column }) => getHeader(column, columnLabels["serviceName"]),
+    accessorKey: "userFullName",
+    header: ({ column }) => getHeader(column, columnLabels["userFullName"]),
+    cell: ({ row }) => {
+      return `${row.original.lastName}  ${row.original.firstName} ${row.original.surName} `;
+    },
   },
   {
-    accessorKey: "doctorFullName",
-    header: ({ column }) => getHeader(column, columnLabels["serviceName"]),
+    accessorKey: "email",
+    header: ({ column }) => getHeader(column, columnLabels["email"]),
+  },
+  {
+    accessorKey: "phone",
+    header: ({ column }) => getHeader(column, columnLabels["phone"]),
+  },
+  {
+    accessorKey: "gender",
+    header: ({ column }) => getHeader(column, columnLabels["gender"]),
+    cell: ({ row }) =>
+      row.getValue("gender") == "MALE"
+        ? "Мужской"
+        : row.getValue("gender") == "FEMALE"
+          ? "Женский"
+          : "Не найдено",
   },
   {
     accessorKey: "status",
@@ -96,76 +148,8 @@ const columns: TableColumn<OrdersTable>[] = [
       });
     },
   },
-  {
-    accessorKey: "price",
-    header: ({ column }) => getHeader(column, columnLabels["price"]),
-    cell: ({ row }) => {
-      return row.getValue("price") ? `${row.getValue("price")} ₽` : "Бесплатно";
-    },
-  },
 ];
 
-function getHeader(column: Column<User>, label: string) {
-  const isSorted = column.getIsSorted();
-
-  return h(
-    UDropdownMenu,
-    {
-      content: {
-        align: "start",
-      },
-      "aria-label": "Actions dropdown",
-      items: [
-        {
-          label: "По возрастанию",
-          type: "checkbox",
-          icon: "i-lucide-arrow-up-narrow-wide",
-          checked: isSorted === "asc",
-          onSelect: () => {
-            if (isSorted === "asc") {
-              column.clearSorting();
-            } else {
-              column.toggleSorting(false);
-            }
-          },
-        },
-        {
-          label: "По убыванию",
-          icon: "i-lucide-arrow-down-wide-narrow",
-          type: "checkbox",
-          checked: isSorted === "desc",
-          onSelect: () => {
-            if (isSorted === "desc") {
-              column.clearSorting();
-            } else {
-              column.toggleSorting(true);
-            }
-          },
-        },
-      ],
-    },
-    () =>
-      h(UButton, {
-        color: "neutral",
-        variant: "ghost",
-        label,
-        icon: isSorted
-          ? isSorted === "asc"
-            ? "i-lucide-arrow-up-narrow-wide"
-            : "i-lucide-arrow-down-wide-narrow"
-          : "i-lucide-arrow-up-down",
-        class: "-mx-2.5 data-[state=open]:bg-elevated",
-        "aria-label": `Sort by ${isSorted === "asc" ? "descending" : "ascending"}`,
-      }),
-  );
-}
-
-const sorting = ref([
-  {
-    id: "id",
-    desc: false,
-  },
-]);
 const pagination = ref({
   pageIndex: 0,
   pageSize: 5,
@@ -175,27 +159,6 @@ const openModal = ref(false);
 const printOrder = () => {
   window.print();
 };
-async function deleteOrder() {
-  await useFetch(
-    `${config.public.apiUrl}/admin/orders/delete/${order?.value?.id}`,
-    {
-      method: "DELETE",
-      headers: new Headers({
-        "Authorization": `Bearer ${token}`,
-      }),
-    },
-  );
-  console.log("asdas");
-  openModal.value = false;
-  toast.add({
-    title: "Заявка удалена",
-    color: "success",
-    icon: "i-lucide-check",
-  });
-  setTimeout(() => {
-    router.replace("/admin/orders");
-  }, 5000);
-}
 </script>
 
 <template>
@@ -206,47 +169,11 @@ async function deleteOrder() {
         color="info"
         icon="i-lucide-arrow-left"
         class="cursor-pointer"
-        to="/admin/orders"
+        to="/admin/categories"
         size="xl"
       >
         Вернутся к заявкам
       </UButton>
-      <UModal v-model:open="openModal">
-        <UButton
-          variant="solid"
-          color="error"
-          icon="i-lucide-trash"
-          class="cursor-pointer"
-          size="xl"
-        >
-          Удалить
-        </UButton>
-        <template #body>
-          <div class="p-8">
-            <h4 class="text-2xl">Вы точно хотите удалить запись?</h4>
-          </div>
-        </template>
-        <template #footer>
-          <div class="flex items-center space-x-4">
-            <UButton
-              label="Закрыть"
-              color="neutral"
-              class="cursor-pointer"
-              variant="outline"
-              @click="openModal = false"
-            />
-            <UButton
-              variant="solid"
-              color="error"
-              @click="deleteOrder"
-              icon="i-lucide-trash"
-              class="cursor-pointer"
-            >
-              Удалить
-            </UButton>
-          </div>
-        </template>
-      </UModal>
       <UButton
         variant="solid"
         color="primary"
@@ -266,172 +193,135 @@ async function deleteOrder() {
       </p>
     </div>
 
-    <UCard>
-      <template #header>
-        <div class="flex justify-between items-center flex-wrap">
-          <h2 class="text-3xl">Запись номер - №{{ order?.id }}</h2>
-          <h2 class="text-3xl">Дата и время - {{ orderDate }}</h2>
-          <UBadge
-            :color="order?.status == 'PROVIDED' ? 'success' : 'neutral'"
-            size="xl"
-            class="capitalize print-status"
-            variant="subtle"
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <UCard class="p-3 lg:col-span-2">
+        <template #header>
+          <div class="flex p-2 justify-between items-start">
+            <div class="space-y-2">
+              <h2 class="text-2xl font-bold">
+                {{ serviceFullInfo?.service.name }}
+              </h2>
+              <p class="text-gray-500 text-xl">
+                {{ serviceFullInfo?.service.categoryName }}
+              </p>
+            </div>
+            <div class="space-y-3 flex-col flex items-strech">
+              <UButton
+                color="info"
+                class="flex items-center cursor-pointer gap-1"
+              >
+                <Edit class="size-8" />
+                <span>Изменить</span>
+              </UButton>
+              <UButton
+                color="error"
+                class="flex items-center cursor-pointer gap-1"
+              >
+                <Trash2 class="size-8" />
+                <span>Удалить</span>
+              </UButton>
+            </div>
+          </div>
+        </template>
+        <template #default>
+          <div class="p-3">
+            <h3 class="text-2xl font-semibold mb-3">Описание</h3>
+            <p class="text-lg mb-6">
+              {{ serviceFullInfo?.service.description }}
+            </p>
+          </div>
+        </template>
+      </UCard>
+
+      <UCard class="mb-6">
+        <template #header>
+          <div class="p-3">
+            <h3 class="text-2xl font-semibold">Информация о услуги</h3>
+          </div>
+        </template>
+        <template #default>
+          <div class="p-6">
+            <div class="space-y-4">
+              <div>
+                <p class="text-lg text-gray-500 mb-1">Цена</p>
+                <p class="font-medium text-xl">
+                  {{ serviceFullInfo?.service.price }} рублей
+                </p>
+              </div>
+
+              <div>
+                <p class="text-lg text-gray-500 mb-1">Всего заработано</p>
+                <p class="font-medium text-xl">
+                  {{ serviceFullInfo?.ordersSum }} рублей
+                </p>
+              </div>
+
+              <div>
+                <p class="text-lg text-gray-500 mb-1">Дата последней записи</p>
+                <p class="font-medium text-xl">{{ lastOrderDate }}</p>
+              </div>
+            </div>
+          </div>
+        </template>
+      </UCard>
+      <UCard class="col-span-3">
+        <template #header>
+          <div class="flex p-2 justify-between items-start p-2">
+            <h2 class="text-center text-2xl font-bold">Заказы по услуги</h2>
+
+            <ExportButton
+              :column-labels="columnExportLabels"
+              :name="`Пользователи записанные на услугу ${serviceFullInfo?.service.name}`"
+              :data="serviceFullInfo?.ordersByService || [{}]"
+            />
+          </div>
+        </template>
+        <template #default>
+          <UTable
+            v-model:sorting="sorting"
+            :data="serviceFullInfo?.ordersByService"
+            ref="table"
+            sticky
+            v-model:pagination="pagination"
+            :pagination-options="{
+              getPaginationRowModel: getPaginationRowModel(),
+            }"
+            :loading="loading"
+            loading-color="info"
+            loading-animation="carousel"
+            :columns="columns"
+            v-model:global-filter="globalFilter"
+            class="print-table"
           >
-            {{ order?.status == "PROVIDED" ? "Оказана" : "Ожидает" }}
-          </UBadge>
-        </div>
-      </template>
-      <template #default>
-        <div class="space-y-8 py-2">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-3">
-              <h3 class="text-2xl font-semibold mb-2">
-                Информация о пользователе
-              </h3>
-              <p class="text-lg">
-                ФИО -
-                <span class="font-bold">
-                  {{ order?.user?.lastName }} {{ order?.user?.firstName }}
-                  {{ order?.user?.surName }}
-                </span>
-              </p>
-              <p class="text-lg">
-                Электронная почта -
-                <span class="font-bold">{{ order?.user?.email }}</span>
-              </p>
-              <p class="text-lg">
-                Номер телефона -
-                <span class="font-bold"> +{{ order?.user?.phone }} </span>
-              </p>
-              <p class="text-lg">
-                Снилс -
-                <span class="font-bold">{{ order?.user?.snils }}</span>
-              </p>
-
-              <p class="text-lg">
-                Пол -
-                <span class="font-bold">{{
-                  order?.user?.gender == "MALE" ? "Мужчина" : "Женщина"
-                }}</span>
-              </p>
-              <p class="text-lg">
-                Дата рождения -
-                <span class="font-bold">{{
-                  new Date(order?.user?.birth).toLocaleString("ru-RU", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                    hour12: false,
-                  })
-                }}</span>
-              </p>
-            </div>
-            <div class="space-y-3">
-              <div class="space-y-1">
-                <h3 class="text-xl md:text-2xl font-semibold mb-2">
-                  Информация о услуги
-                </h3>
-                <p class="text-lg">
-                  Название -
-                  <span class="font-bold">
-                    {{ order?.service?.name }}
-                  </span>
-                </p>
-                <p class="text-lg">
-                  Категория -
-                  <span class="font-bold">{{
-                    order?.service?.categoryName
-                  }}</span>
-                </p>
-                <p class="text-lg">
-                  Стоимость -
-                  <span class="font-bold"
-                    >{{ order?.service?.price }} рублей</span
-                  >
-                </p>
-              </div>
-              <div class="space-y-1">
-                <h3 class="text-xl md:text-2xl font-semibold mb-2">
-                  Информация о докторе
-                </h3>
-                <p class="text-lg">
-                  ФИО -
-                  <span class="font-bold">
-                    {{ order?.doctor?.lastName }} {{ order?.doctor?.firstName }}
-                    {{ order?.doctor?.surName }}
-                  </span>
-                </p>
-                <p class="text-lg">
-                  Должность -
-                  <span class="font-bold">{{ order?.doctor?.post }}</span>
-                </p>
-                <p class="text-lg">
-                  Опыт -
-                  <span class="font-bold">{{ order?.doctor?.experience }}</span>
-                </p>
-                <p class="text-lg">
-                  Электронная почта -
-                  <span class="font-bold"> {{ order?.doctor?.email }} </span>
-                </p>
-              </div>
-            </div>
+            <template #expanded="{ row }">
+              <pre>{{ row.original }}</pre>
+            </template>
+          </UTable>
+          <div
+            class="flex justify-center border-t border-default pt-4 no-print"
+          >
+            <UPagination
+              :default-page="
+                (table?.tableApi?.getState().pagination.pageIndex || 0) + 1
+              "
+              :items-per-page="table?.tableApi?.getState().pagination.pageSize"
+              :total="table?.tableApi?.getFilteredRowModel().rows.length"
+              @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)"
+              active-color="info"
+            />
           </div>
-          <div class="">
-            <h3 class="text-2xl font-semibold mb-4">
-              Другие записи пользователя
-            </h3>
-
-            <UTable
-              v-model:sorting="sorting"
-              :data="order?.userOtherOrders"
-              ref="table"
-              sticky
-              v-model:pagination="pagination"
-              :pagination-options="{
-                getPaginationRowModel: getPaginationRowModel(),
-              }"
-              :loading="loading"
-              loading-color="info"
-              loading-animation="carousel"
-              :columns="columns"
-              v-model:global-filter="globalFilter"
-              class="print-table"
-            >
-              <template #expanded="{ row }">
-                <pre>{{ row.original }}</pre>
-              </template>
-            </UTable>
-            <div
-              class="flex justify-center border-t border-default pt-4 no-print"
-            >
-              <UPagination
-                :default-page="
-                  (table?.tableApi?.getState().pagination.pageIndex || 0) + 1
-                "
-                :items-per-page="
-                  table?.tableApi?.getState().pagination.pageSize
-                "
-                :total="table?.tableApi?.getFilteredRowModel().rows.length"
-                @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)"
-                active-color="info"
-              />
-            </div>
-          </div>
-        </div>
-      </template>
-    </UCard>
+        </template>
+      </UCard>
+    </div>
   </div>
 </template>
 
 <style>
-/* Print-specific styles */
 @media print {
-  /* Hide elements not needed for printing */
   .no-print {
     display: none !important;
   }
 
-  /* Show elements only for printing */
   .print-only {
     display: block !important;
   }

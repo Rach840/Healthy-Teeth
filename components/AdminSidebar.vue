@@ -40,7 +40,7 @@ const items = [
 </script>
 
 <template>
-  <Sidebar>
+  <Sidebar class="no-print">
     <SidebarContent>
       <SidebarGroup>
         <SidebarGroupLabel class="py-8">
@@ -79,3 +79,11 @@ const items = [
     </SidebarContent>
   </Sidebar>
 </template>
+<style>
+@media print {
+  /* Hide elements not needed for printing */
+  .no-print {
+    display: none !important;
+  }
+}
+</style>

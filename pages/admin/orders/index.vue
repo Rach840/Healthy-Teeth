@@ -3,7 +3,11 @@ import type { OrdersTable, User } from "~/lib/types";
 import { h, resolveComponent } from "vue";
 import type { TableColumn } from "@nuxt/ui";
 import type { Column } from "@tanstack/vue-table";
-import { upperFirst } from "scule";
+import {
+  getHeaderButtonProps,
+  getHeaderDropDownProps,
+  sorting,
+} from "~/lib/getHeader";
 import { exportFile } from "~/lib/export-table";
 
 definePageMeta({
@@ -46,7 +50,13 @@ const columnLabels: Record<string, string> = {
   date: "Дата",
   price: "Цена",
 };
+function getHeader(column: Column<User>, label: string) {
+  const isSorted = column.getIsSorted();
 
+  return h(UDropdownMenu, getHeaderDropDownProps(isSorted, column), () =>
+    h(UButton, getHeaderButtonProps(isSorted, label)),
+  );
+}
 const columns: TableColumn<OrdersTable>[] = [
   {
     accessorKey: "id",
@@ -134,61 +144,6 @@ const columns: TableColumn<OrdersTable>[] = [
   },
 ];
 
-function getHeader(column: Column<User>, label: string) {
-  const isSorted = column.getIsSorted();
-
-  return h(
-    UDropdownMenu,
-    {
-      content: {
-        align: "start",
-      },
-      "aria-label": "Actions dropdown",
-      items: [
-        {
-          label: "По возрастанию",
-          type: "checkbox",
-          icon: "i-lucide-arrow-up-narrow-wide",
-          checked: isSorted === "asc",
-          onSelect: () => {
-            if (isSorted === "asc") {
-              column.clearSorting();
-            } else {
-              column.toggleSorting(false);
-            }
-          },
-        },
-        {
-          label: "По убыванию",
-          icon: "i-lucide-arrow-down-wide-narrow",
-          type: "checkbox",
-          checked: isSorted === "desc",
-          onSelect: () => {
-            if (isSorted === "desc") {
-              column.clearSorting();
-            } else {
-              column.toggleSorting(true);
-            }
-          },
-        },
-      ],
-    },
-    () =>
-      h(UButton, {
-        color: "neutral",
-        variant: "ghost",
-        label,
-        icon: isSorted
-          ? isSorted === "asc"
-            ? "i-lucide-arrow-up-narrow-wide"
-            : "i-lucide-arrow-down-wide-narrow"
-          : "i-lucide-arrow-up-down",
-        class: "-mx-2.5 data-[state=open]:bg-elevated",
-        "aria-label": `Sort by ${isSorted === "asc" ? "descending" : "ascending"}`,
-      }),
-  );
-}
-
 const statistic = ref();
 watch(orders, () => {
   statistic.value = [
@@ -257,12 +212,6 @@ watch(orders, () => {
   ];
 });
 
-const sorting = ref([
-  {
-    id: "id",
-    desc: false,
-  },
-]);
 const globalFilter = ref<string>("");
 </script>
 
@@ -307,39 +256,10 @@ const globalFilter = ref<string>("");
             @click="() => exportFile(orders, 'Пользователи')"
             >Экспорт</UButton
           >
-          <UDropdownMenu
-            :items="
-              table?.tableApi
-                ?.getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return {
-                    label: columnLabels[column.id] ?? upperFirst(column.id),
-                    type: 'checkbox' as const,
-                    checked: column.getIsVisible(),
-                    onUpdateChecked(checked: boolean) {
-                      table?.tableApi
-                        ?.getColumn(column.id)
-                        ?.toggleVisibility(!!checked);
-                    },
-                    onSelect(e?: Event) {
-                      e?.preventDefault();
-                    },
-                  };
-                })
-            "
-            :content="{ align: 'end' }"
-          >
-            <UButton
-              label="Колонки"
-              color="neutral"
-              size="xl"
-              variant="outline"
-              trailing-icon="i-lucide-chevron-down"
-              class="ml-auto"
-              aria-label="Columns select dropdown"
-            />
-          </UDropdownMenu>
+          <DropDownSort
+            :table="table"
+            :column-labels="columnLabels"
+          />
         </div>
       </template>
       <UTable

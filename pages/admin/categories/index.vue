@@ -9,9 +9,12 @@ definePageMeta({
 });
 const UButton = resolveComponent("UButton");
 const UBadge = resolveComponent("UBadge");
+const table = useTemplateRef("table");
 const config = useRuntimeConfig();
 const { token, isAuthenticated } = useAuthStore();
 const categories = ref<[] | null>(null);
+const servicesExport = ref<[] | null>(null);
+const categoriesExport = ref<[] | null>(null);
 const loading = ref(true);
 watchEffect(async () => {
   if (isAuthenticated) {
@@ -26,12 +29,39 @@ watchEffect(async () => {
     );
     console.log(categoriesResp.value, status);
     categories.value = categoriesResp.value;
+    servicesExport.value = categoriesResp.value
+      ?.map((item) => item.services)
+      .flat(1);
+    categoriesExport.value = categoriesResp.value?.map((item) => {
+      return {
+        id: item.id,
+        name: item.name,
+        description: item.description,
+      };
+    });
+    console.log(servicesExport.value);
+    console.log(categoriesExport.value);
     loading.value = false;
   }
 });
+const columnCategoryExportLabels: Record<string, string> = {
+  id: "ID",
+  name: "Название категории",
+  description: "Описание",
+};
+const columnServiceExportLabels: Record<string, string> = {
+  id: "ID",
+  name: "Название услуги",
+  price: "Цена",
+  categoryName: "Название категории",
+  ordersActiveByService: "Количество активных записей",
+
+  description: "Описание",
+  doctorId: "ID Доктора",
+};
 
 const columnCategoryLabels: Record<string, string> = {
-  expanded: "",
+  expanded: "Подробнее",
   id: "ID",
   name: "Название категории",
   doctorFullName: "ФИО врача",
@@ -50,7 +80,7 @@ const columnServiceLabels: Record<string, string> = {
 
 const columns: TableColumn<CategoryFullInfo>[] = [
   {
-    id: "expand",
+    id: "expanded",
     cell: ({ row }) =>
       h(UButton, {
         color: "neutral",
@@ -192,39 +222,82 @@ const columnsServices: TableColumn<CategoryFullInfo>[] = [
     },
   },
 ];
-
-const expanded = ref({ 1: true });
+const globalFilter = ref<string>("");
+const expanded = ref({});
 </script>
 
 <template>
   <div class="container mx-auto">
-    <UTable
-      v-model:expanded="expanded"
-      :data="categories"
-      :loading="loading"
-      loading-color="info"
-      loading-animation="carousel"
-      :columns="columns"
+    <h1 class="text-md sm:text-lg md:text-2xl lg:text-4xl font-bold mb-6">
+      Главная
+    </h1>
+    <UCard
       :ui="{
-        tr: 'data-[expanded=true]:bg-elevated/50',
+        body: 'px-0 md:px-0',
       }"
-      class="flex-1"
     >
-      <template #expanded="{ row }">
+      <template #header>
+        <div class="flex items-center gap-2 px-4 py-3.5 overflow-x-auto">
+          <UInput
+            v-model="globalFilter"
+            class="max-w-sm min-w-[12ch]"
+            size="xl"
+            placeholder="Фильтры..."
+          />
+          <!--          <UButton-->
+          <!--            variant="outline"-->
+          <!--            icon="i-lucide-file"-->
+          <!--            size="xl"-->
+          <!--            color="info"-->
+          <!--            class="ml-auto"-->
+          <!--            @click="() => exportFile(orders, 'Пользователи')"-->
+          <!--            >Экспорт</UButton-->
+          <!--          >-->
+          <ExportButton
+            :data="categoriesExport"
+            :data2="servicesExport"
+            :column-labels="columnCategoryExportLabels"
+            :column-labels2="columnServiceExportLabels"
+            name="Отчет по категориям"
+          />
+          <DropDownSort
+            :table="table"
+            :column-labels="columnCategoryLabels"
+          />
+        </div>
+      </template>
+      <template #default>
         <UTable
-          :data="row.original.services"
+          v-model:expanded="expanded"
+          :data="categories"
           :loading="loading"
           loading-color="info"
           loading-animation="carousel"
-          :columns="columnsServices"
+          :columns="columns"
+          ref="table"
+          v-model:global-filter="globalFilter"
           :ui="{
-            root: 'p-0 pb-4 pl-6',
-            tr: 'bg-elevated/50',
+            tr: 'data-[expanded=true]:bg-elevated/50',
           }"
           class="flex-1"
-        />
+        >
+          <template #expanded="{ row }">
+            <UTable
+              :data="row.original.services"
+              :loading="loading"
+              loading-color="info"
+              loading-animation="carousel"
+              :columns="columnsServices"
+              :ui="{
+                root: 'p-0 pb-4 pl-6',
+                tr: 'bg-elevated/50',
+              }"
+              class="flex-1"
+            />
+          </template>
+        </UTable>
       </template>
-    </UTable>
+    </UCard>
   </div>
 </template>
 <style>

@@ -2,8 +2,12 @@
 import type { orderFullInfo, OrdersTable, User } from "~/lib/types";
 import { h, resolveComponent } from "vue";
 import type { TableColumn } from "@nuxt/ui";
-import type { Column } from "@tanstack/vue-table";
-import { getPaginationRowModel } from "@tanstack/vue-table";
+import { type Column, getPaginationRowModel } from "@tanstack/vue-table";
+import {
+  getHeaderButtonProps,
+  getHeaderDropDownProps,
+  sorting,
+} from "~/lib/getHeader";
 
 definePageMeta({
   layout: ["admin"],
@@ -12,8 +16,9 @@ definePageMeta({
 const table = useTemplateRef("table");
 const UBadge = resolveComponent("UBadge");
 const UButton = resolveComponent("UButton");
-const UDropdownMenu = resolveComponent("UDropdownMenu");
 const config = useRuntimeConfig();
+
+const UDropdownMenu = resolveComponent("UDropdownMenu");
 const { token, isAuthenticated } = useAuthStore();
 const order = ref<orderFullInfo | null>(null);
 const loading = ref(true);
@@ -54,7 +59,13 @@ const columnLabels: Record<string, string> = {
   date: "Дата",
   price: "Цена",
 };
+function getHeader(column: Column<User>, label: string) {
+  const isSorted = column.getIsSorted();
 
+  return h(UDropdownMenu, getHeaderDropDownProps(isSorted, column), () =>
+    h(UButton, getHeaderButtonProps(isSorted, label)),
+  );
+}
 const columns: TableColumn<OrdersTable>[] = [
   {
     accessorKey: "id",
@@ -105,67 +116,6 @@ const columns: TableColumn<OrdersTable>[] = [
   },
 ];
 
-function getHeader(column: Column<User>, label: string) {
-  const isSorted = column.getIsSorted();
-
-  return h(
-    UDropdownMenu,
-    {
-      content: {
-        align: "start",
-      },
-      "aria-label": "Actions dropdown",
-      items: [
-        {
-          label: "По возрастанию",
-          type: "checkbox",
-          icon: "i-lucide-arrow-up-narrow-wide",
-          checked: isSorted === "asc",
-          onSelect: () => {
-            if (isSorted === "asc") {
-              column.clearSorting();
-            } else {
-              column.toggleSorting(false);
-            }
-          },
-        },
-        {
-          label: "По убыванию",
-          icon: "i-lucide-arrow-down-wide-narrow",
-          type: "checkbox",
-          checked: isSorted === "desc",
-          onSelect: () => {
-            if (isSorted === "desc") {
-              column.clearSorting();
-            } else {
-              column.toggleSorting(true);
-            }
-          },
-        },
-      ],
-    },
-    () =>
-      h(UButton, {
-        color: "neutral",
-        variant: "ghost",
-        label,
-        icon: isSorted
-          ? isSorted === "asc"
-            ? "i-lucide-arrow-up-narrow-wide"
-            : "i-lucide-arrow-down-wide-narrow"
-          : "i-lucide-arrow-up-down",
-        class: "-mx-2.5 data-[state=open]:bg-elevated",
-        "aria-label": `Sort by ${isSorted === "asc" ? "descending" : "ascending"}`,
-      }),
-  );
-}
-
-const sorting = ref([
-  {
-    id: "id",
-    desc: false,
-  },
-]);
 const pagination = ref({
   pageIndex: 0,
   pageSize: 5,
@@ -185,7 +135,6 @@ async function deleteOrder() {
       }),
     },
   );
-  console.log("asdas");
   openModal.value = false;
   toast.add({
     title: "Заявка удалена",

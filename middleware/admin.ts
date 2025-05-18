@@ -4,7 +4,7 @@ export default defineNuxtRouteMiddleware(() => {
   onMounted(async () => {
     await authStore.checkAuth();
   });
-  if (authStore?.user.role != "ADMIN") {
+  if (authStore?.user?.role != "ADMIN") {
     return navigateTo("/");
   }
 });

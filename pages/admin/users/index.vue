@@ -5,6 +5,11 @@ import type { TableColumn } from "@nuxt/ui";
 import type { Column } from "@tanstack/vue-table";
 import { upperFirst } from "scule";
 import { exportFile } from "~/lib/export-table";
+import {
+  getHeaderButtonProps,
+  getHeaderDropDownProps,
+  sorting,
+} from "~/lib/getHeader";
 
 definePageMeta({
   layout: ["admin"],
@@ -105,64 +110,10 @@ const columns: TableColumn<User>[] = [
 function getHeader(column: Column<User>, label: string) {
   const isSorted = column.getIsSorted();
 
-  return h(
-    UDropdownMenu,
-    {
-      content: {
-        align: "start",
-      },
-      "aria-label": "Actions dropdown",
-      items: [
-        {
-          label: "По возрастанию",
-          type: "checkbox",
-          icon: "i-lucide-arrow-up-narrow-wide",
-          checked: isSorted === "asc",
-          onSelect: () => {
-            if (isSorted === "asc") {
-              column.clearSorting();
-            } else {
-              column.toggleSorting(false);
-            }
-          },
-        },
-        {
-          label: "По убыванию",
-          icon: "i-lucide-arrow-down-wide-narrow",
-          type: "checkbox",
-          checked: isSorted === "desc",
-          onSelect: () => {
-            if (isSorted === "desc") {
-              column.clearSorting();
-            } else {
-              column.toggleSorting(true);
-            }
-          },
-        },
-      ],
-    },
-    () =>
-      h(UButton, {
-        color: "neutral",
-        variant: "ghost",
-        label,
-        icon: isSorted
-          ? isSorted === "asc"
-            ? "i-lucide-arrow-up-narrow-wide"
-            : "i-lucide-arrow-down-wide-narrow"
-          : "i-lucide-arrow-up-down",
-        class: "-mx-2.5 data-[state=open]:bg-elevated",
-        "aria-label": `Sort by ${isSorted === "asc" ? "descending" : "ascending"}`,
-      }),
+  return h(UDropdownMenu, getHeaderDropDownProps(isSorted, column), () =>
+    h(UButton, getHeaderButtonProps(isSorted, label)),
   );
 }
-
-const sorting = ref([
-  {
-    id: "id",
-    desc: false,
-  },
-]);
 </script>
 
 <template>
@@ -200,7 +151,7 @@ const sorting = ref([
               onUpdateChecked(checked: boolean) {
                 table?.tableApi
                   ?.getColumn(column.id)
-                  ?.toggleVisibility(!!checked);
+                  ?.toggleVisibility(checked);
               },
               onSelect(e?: Event) {
                 e?.preventDefault();
